@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved.bak
+
+# App bundle output from build_app.sh
+build/
+
+# Xcode
+xcuserdata/
+DerivedData/
+*.xcuserstate
