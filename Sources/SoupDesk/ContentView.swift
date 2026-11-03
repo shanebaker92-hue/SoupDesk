@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import UniformTypeIdentifiers
 import SoupKit
 
@@ -27,14 +28,7 @@ struct ContentView: View {
         .ignoresSafeArea()
         .background(WindowChrome())
         .preferredColorScheme(.dark)
-        .focusable().focused($focused).focusEffectDisabled()
-        .onAppear { focused = true }
-        .onKeyPress(.leftArrow) { m.move(photo: -1); return .handled }
-        .onKeyPress(.rightArrow) { m.move(photo: 1); return .handled }
-        .onKeyPress(.upArrow) { m.move(stock: -1); return .handled }
-        .onKeyPress(.downArrow) { m.move(stock: 1); return .handled }
-        .onKeyPress(.return) { m.developCurrent(); return .handled }
-        .onKeyPress("f") { m.toggleFavourite(); return .handled }
+        .keyControls(focused: $focused, m)
         .onDrop(of: [.fileURL], isTargeted: nil) { providers in
             Task {
                 var urls: [URL] = []
@@ -145,7 +139,7 @@ struct ContentView: View {
             PixelText(text: m.photos.isEmpty ? "No photos yet" : "\(m.photos.count) photos", px: 1, color: Pix.dim)
                 .padding(.leading, 2)
             ScrollViewReader { proxy in
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 10) {
                         ForEach(Array(m.photos.enumerated()), id: \.element.id) { i, p in
                             let on = i == m.current
@@ -169,8 +163,7 @@ struct ContentView: View {
                     }
                     .padding(.bottom, 4)
                 }
-                .scrollIndicators(.never)
-                .onChange(of: m.current) { _, i in withAnimation { proxy.scrollTo(i, anchor: .center) } }
+                .onChange(of: m.current) { i in withAnimation { proxy.scrollTo(i, anchor: .center) } }
             }
         }
         .padding(.horizontal, 12).padding(.top, 14).padding(.bottom, 12)
@@ -186,7 +179,7 @@ struct ContentView: View {
             }
             .padding(3).well(17)
             ScrollViewReader { proxy in
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 2) {
                         let order = m.stockOrder
                         let favCount = order.filter { m.isFavourite($0) }.count
@@ -198,8 +191,7 @@ struct ContentView: View {
                     }
                     .padding(.vertical, 4)
                 }
-                .scrollIndicators(.never)
-                .onChange(of: m.currentStock) { _, i in withAnimation { proxy.scrollTo(i, anchor: .center) } }
+                .onChange(of: m.currentStock) { i in withAnimation { proxy.scrollTo(i, anchor: .center) } }
             }
             VStack(alignment: .leading, spacing: 8) {
                 PixelText(text: s.map { FilmLook.forStock($0.id, name: $0.name).maker } ?? "No film look", px: 1, color: Pix.accent)
@@ -214,6 +206,57 @@ struct ContentView: View {
 
     func sectionLabel(_ t: String) -> some View {
         PixelText(text: t, px: 1, color: Pix.accent).padding(.top, 10).padding(.bottom, 2).padding(.leading, 10)
+    }
+}
+
+extension View {
+    /// Arrows change photo and film, Return develops (F is the Film menu's shortcut). SwiftUI's key
+    /// handlers on macOS 14+; a key monitor on the window before that.
+    @ViewBuilder
+    func keyControls(focused: FocusState<Bool>.Binding, _ m: Model) -> some View {
+        if #available(macOS 14, *) {
+            focusable().focused(focused).focusEffectDisabled()
+                .onAppear { focused.wrappedValue = true }
+                .onKeyPress(.leftArrow) { m.move(photo: -1); return .handled }
+                .onKeyPress(.rightArrow) { m.move(photo: 1); return .handled }
+                .onKeyPress(.upArrow) { m.move(stock: -1); return .handled }
+                .onKeyPress(.downArrow) { m.move(stock: 1); return .handled }
+                .onKeyPress(.return) { m.developCurrent(); return .handled }
+                .onKeyPress("f") { m.toggleFavourite(); return .handled }
+        } else {
+            background(KeyMonitor(m: m))
+        }
+    }
+}
+
+/// The macOS 12–13 keys: a local keyDown monitor scoped to this view's window, leaving text fields
+/// and modified keys alone.
+struct KeyMonitor: NSViewRepresentable {
+    let m: Model
+
+    final class Coordinator { var monitor: Any? }
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    func makeNSView(context: Context) -> NSView {
+        let v = NSView()
+        context.coordinator.monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak v, m] e in
+            guard let w = v?.window, e.window === w, !(w.firstResponder is NSText),
+                  e.modifierFlags.intersection([.command, .option, .control]).isEmpty else { return e }
+            switch e.keyCode {
+            case 123: m.move(photo: -1)
+            case 124: m.move(photo: 1)
+            case 126: m.move(stock: -1)
+            case 125: m.move(stock: 1)
+            case 36, 76: m.developCurrent()
+            default: return e
+            }
+            return nil
+        }
+        return v
+    }
+    func updateNSView(_ v: NSView, context: Context) {}
+    static func dismantleNSView(_ v: NSView, coordinator: Coordinator) {
+        coordinator.monitor.map(NSEvent.removeMonitor)
     }
 }
 

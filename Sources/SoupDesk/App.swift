@@ -8,9 +8,10 @@ struct SoupDeskApp: App {
     @StateObject private var model = Model()
     var body: some Scene {
         WindowGroup("SoupDesk") {
-            ContentView().environmentObject(model).frame(minWidth: 1100, minHeight: 680)
+            // ideal, not .defaultSize: the first window opens at the ideal size, back to macOS 12
+            ContentView().environmentObject(model)
+                .frame(minWidth: 1100, idealWidth: 1240, minHeight: 680, idealHeight: 780)
         }
-        .defaultSize(width: 1240, height: 780)
         .windowStyle(.hiddenTitleBar)       // no grey bar: the photo runs to the top edge
         .commands {
             CommandGroup(replacing: .newItem) {

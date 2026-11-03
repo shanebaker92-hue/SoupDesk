@@ -3,14 +3,16 @@
 # ./build_app.sh dist — sign with Developer ID, notarize and staple, for running on other Macs.
 set -e
 cd "$(dirname "$0")"
-swift build -c release --product SoupDesk
+# Universal (Apple silicon + Intel), macOS 12 and later.
+swift build -c release --arch arm64 --arch x86_64 --product SoupDesk
+BIN=$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)
 APP=build/SoupDesk.app
 rm -rf "$APP"; mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp .build/release/SoupDesk "$APP/Contents/MacOS/"
+cp "$BIN/SoupDesk" "$APP/Contents/MacOS/"
 cp -R Resources/Stocks "$APP/Contents/Resources/Stocks"
 # Icon Composer bundle → Assets.car (Liquid Glass icon) + SoupDesk.icns (older macOS)
 xcrun actool Design/SoupDesk.icon --compile "$APP/Contents/Resources" --app-icon SoupDesk \
-    --platform macosx --minimum-deployment-target 14.0 --output-partial-info-plist build/icon.plist >/dev/null
+    --platform macosx --minimum-deployment-target 12.0 --output-partial-info-plist build/icon.plist >/dev/null
 cat > "$APP/Contents/Info.plist" <<PL
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -21,9 +23,9 @@ cat > "$APP/Contents/Info.plist" <<PL
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleIconFile</key><string>SoupDesk</string>
 <key>CFBundleIconName</key><string>SoupDesk</string>
-<key>CFBundleShortVersionString</key><string>0.1.1</string>
-<key>CFBundleVersion</key><string>2</string>
-<key>LSMinimumSystemVersion</key><string>14.0</string>
+<key>CFBundleShortVersionString</key><string>0.2</string>
+<key>CFBundleVersion</key><string>3</string>
+<key>LSMinimumSystemVersion</key><string>12.0</string>
 <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PL
