@@ -2,6 +2,9 @@
 
 Mac app: Soup Engine film stocks on any camera raw or JPEG.
 
+**Download:** [SoupDesk.zip from the latest release](https://github.com/shanebaker92-hue/SoupDesk/releases/latest/download/SoupDesk.zip).
+Unzip and drag `SoupDesk.app` to Applications. Signed and notarized; macOS 14 or later (Liquid Glass on macOS 26+).
+
 - `Sources/SoupEngine/` — Soup Engine C, copied unmodified from [Souper7D](https://github.com/shanebaker92-hue/souper7d)'s `src/engine` (se, look, grade, stock, lut, color, wb, jpeg_dec) + `soup_bridge.c`.
 - `Sources/SoupKit/` — decode (ImageIO / CIRAWFilter), grade, develop.
 - `Sources/SoupDesk/` — SwiftUI app. `Resources/Stocks/` — the 27 `.fs` + INDEX.TXT.
