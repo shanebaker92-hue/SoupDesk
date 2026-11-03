@@ -8,6 +8,9 @@ APP=build/SoupDesk.app
 rm -rf "$APP"; mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp .build/release/SoupDesk "$APP/Contents/MacOS/"
 cp -R Resources/Stocks "$APP/Contents/Resources/Stocks"
+# Icon Composer bundle → Assets.car (Liquid Glass icon) + SoupDesk.icns (older macOS)
+xcrun actool Design/SoupDesk.icon --compile "$APP/Contents/Resources" --app-icon SoupDesk \
+    --platform macosx --minimum-deployment-target 14.0 --output-partial-info-plist build/icon.plist >/dev/null
 cat > "$APP/Contents/Info.plist" <<PL
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -16,6 +19,8 @@ cat > "$APP/Contents/Info.plist" <<PL
 <key>CFBundleIdentifier</key><string>com.shanebaker.soupdesk</string>
 <key>CFBundleExecutable</key><string>SoupDesk</string>
 <key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleIconFile</key><string>SoupDesk</string>
+<key>CFBundleIconName</key><string>SoupDesk</string>
 <key>CFBundleShortVersionString</key><string>0.1</string>
 <key>CFBundleVersion</key><string>1</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>

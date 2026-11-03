@@ -1,14 +1,14 @@
 import SwiftUI
 import CoreGraphics
 
-// MARK: - Palette (the 7D UI's dark greys plus one warm accent)
+// MARK: - Palette (the 7D UI's warm paper ramp plus one amber accent)
 
 enum Pix {
-    static let bg      = Color(hex: 0x0d0d0d)
-    static let panel   = Color(hex: 0x1a1a1a)
-    static let line    = Color(hex: 0x3a3a3a)
-    static let dim     = Color(hex: 0x7a7a7a)
-    static let text    = Color(hex: 0xe6e6e6)
+    static let bg      = Color(hex: 0x0e0c0a)
+    static let ink     = Color(hex: 0x1e1a17)   // text on amber
+    static let line    = Color(hex: 0x5e554a)
+    static let dim     = Color(hex: 0xb3a898)
+    static let text    = Color(hex: 0xf2ebda)
     static let accent  = Color(hex: 0xf5b021)
 }
 
@@ -217,32 +217,6 @@ struct FilmSpriteView: View {
     }
 }
 
-// MARK: - Pixel button: 1px-style border, inverts when hovered
-
-struct PixelButton: View {
-    let title: String
-    var key: String? = nil
-    var px: CGFloat = 2
-    let action: () -> Void
-    @State private var hover = false
-    @Environment(\.isEnabled) private var enabled
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                PixelText(text: title, px: px, color: hover && enabled ? Pix.bg : enabled ? Pix.text : Pix.line)
-                if let key { PixelText(text: key, px: 1, color: hover && enabled ? Pix.bg : Pix.dim) }
-            }
-            .padding(.horizontal, 10).padding(.vertical, 7)
-            .background(hover && enabled ? Pix.accent : Pix.panel)
-            .overlay(Rectangle().strokeBorder(enabled ? Pix.accent : Pix.line, lineWidth: 2))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-        .onHover { hover = $0 }
-    }
-}
-
 // MARK: - Pixel star (favourite)
 
 struct StarView: View {
@@ -252,7 +226,7 @@ struct StarView: View {
     private static let rows = ["...#...", "...#...", "..###..", "#######", ".#####.", "..###..", ".##.##.", "##...##"]
 
     var body: some View {
-        let fill = dark ? Pix.bg : on ? Pix.accent : Pix.line
+        let fill = dark ? Pix.ink : on ? Pix.accent : Pix.line
         Canvas { ctx, _ in
             for (y, r) in StarView.rows.enumerated() {
                 for (x, c) in r.enumerated() where c == "#" {
