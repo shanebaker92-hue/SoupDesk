@@ -7,7 +7,7 @@ Film looks for your Mac. SoupDesk runs your photos through 27 film stocks from
 press Return, and a developed JPEG lands next to your originals.
 
 It is the desktop sibling of [Souper7D](https://github.com/thebakers-club/souper7d), which does the same
-thing inside an original Canon EOS 7D. Same engine, same stocks, same look.
+thing inside an original Canon EOS 7D with the same engine and stocks.
 
 **[Download SoupDesk.zip](https://github.com/thebakers-club/SoupDesk/releases/latest/download/SoupDesk.zip)**:
 signed and notarized, for Apple silicon Macs on macOS 14 or later.
@@ -20,13 +20,12 @@ signed and notarized, for Apple silicon Macs on macOS 14 or later.
 <img src="docs/screens/vision500t.jpg" width="32%" alt="The same photo with Vision3 500T">
 </p>
 
-> 🎨 **The looks are interpretations.** The names are shorthand for the films they're based on, not exact
-> copies. All trademarks belong to their owners. Stocks marked EXPERIMENTAL are new in Souper7D and still
-> being tuned.
+The film names are shorthand for the stocks the looks are based on, not exact copies. All trademarks
+belong to their owners. Stocks marked EXPERIMENTAL are new in Souper7D and still being tuned.
 
 ## What you need
 
-- A Mac with **Apple silicon** on **macOS 14** or later. On macOS 26 and later the window and icon are
+- A Mac with Apple silicon on macOS 14 or later. On macOS 26 and later the window and icon are
   Liquid Glass; earlier versions get the standard blur.
 - Photos as camera raw (CR2, CR3, NEF, ARW, RAF, DNG, ORF, RW2, PEF, SRW, NRW), JPEG, HEIC or TIFF.
   Raws are decoded by macOS, so any camera your Mac's Photos app can open works.
@@ -53,7 +52,7 @@ Drag photos or a folder onto the window, or press **Cmd O**.
 Each photo remembers its own film, and a new photo starts on the last one you used. The preview is graded
 live; developing renders the full-size file.
 
-**Output:** `<photo folder>/Soup/<name>_<film>.jpg`, full resolution, quality 92, with the original EXIF
+Developed files go to `<photo folder>/Soup/<name>_<film>.jpg` at full resolution, quality 92, with the original EXIF
 kept and `SoupDesk - <film>` in the Software tag. Nothing is ever overwritten: a second develop gets a
 `-2`, `-3`… suffix, and your originals are never touched.
 
