@@ -1,38 +1,124 @@
+<p align="center"><img src="docs/icon.png" width="128" alt="SoupDesk icon"></p>
+
 # SoupDesk
 
-Mac app: Soup Engine film stocks on any camera raw or JPEG.
+Film looks for your Mac. SoupDesk runs your photos through 27 film stocks from
+[Soup Engine](https://github.com/jiijii0/soup-engine): drop in a folder of raws or JPEGs, pick a film,
+press Return, and a developed JPEG lands next to your originals.
 
-**Download:** [SoupDesk.zip from the latest release](https://github.com/thebakers-club/SoupDesk/releases/latest/download/SoupDesk.zip).
-Unzip and drag `SoupDesk.app` to Applications. Signed and notarized; macOS 14 or later (Liquid Glass on macOS 26+).
+It is the desktop sibling of [Souper7D](https://github.com/thebakers-club/souper7d), which does the same
+thing inside an original Canon EOS 7D. Same engine, same stocks, same look.
 
-- `Sources/SoupEngine/` — Soup Engine C, copied unmodified from [Souper7D](https://github.com/thebakers-club/souper7d)'s `src/engine` (se, look, grade, stock, lut, color, wb, jpeg_dec) + `soup_bridge.c`.
-- `Sources/SoupKit/` — decode (ImageIO / CIRAWFilter), grade, develop.
-- `Sources/SoupDesk/` — SwiftUI app. `Resources/Stocks/` — the 27 `.fs` + INDEX.TXT.
-- `Sources/soupcheck/` — verification CLI.
+**[Download SoupDesk.zip](https://github.com/thebakers-club/SoupDesk/releases/latest/download/SoupDesk.zip)**:
+signed and notarized, for Apple silicon Macs on macOS 14 or later.
 
-Build: `./build_app.sh` → `build/SoupDesk.app`, signed with the Apple Development identity (`SIGN_IDENTITY=` to override).
-To share: `./build_app.sh dist` signs with Developer ID, notarizes (keychain profile `soupdesk-notary`, `NOTARY_PROFILE=` to override),
-staples, and writes `build/SoupDesk.zip`. One-time setup: a Developer ID Application cert (Xcode → Settings → Accounts → Manage Certificates)
-and `xcrun notarytool store-credentials soupdesk-notary --apple-id <you> --team-id A27T7KN725` with an app-specific password.
+![One frame through all 27 stocks](docs/examples/all-stocks.jpg)
 
-Use: drag photos/folder in. ←/→ photo, ↑/↓ stock, Return or ⌘E develop this photo, ⇧⌘E develop all.
-Film stocks: F (or the star) favourites a stock and pins it to the top; favourites are stored by stock NAME in UserDefaults.
-More stocks: drop or Import `.fs` files, "Get stocks" pulls any new ones from upstream `jiijii0/soup-engine/card/ML/FILM`
-(GitHub API), "Make" opens the Soup Stocks web editor. User stocks live in `~/Library/Application Support/SoupDesk/Stocks`;
-a stock whose NAME already exists is skipped. Unknown stocks get a generic grey roll.
+<p>
+<img src="docs/screens/portra.jpg" width="32%" alt="SoupDesk developing a photo with Portra 400">
+<img src="docs/screens/velvia.jpg" width="32%" alt="The same photo with Velvia 50">
+<img src="docs/screens/vision500t.jpg" width="32%" alt="The same photo with Vision3 500T">
+</p>
 
-Output: `<photo folder>/Soup/<name>_<stock>.jpg` (full res, q92, EXIF kept, never overwrites; `-2`, `-3`… suffix).
+> 🎨 **The looks are interpretations.** The names are shorthand for the films they're based on, not exact
+> copies. All trademarks belong to their owners. Stocks marked EXPERIMENTAL are new in Souper7D and still
+> being tuned.
 
-Check: `swift build -c release && .build/release/soupcheck photo.jpg Resources/Stocks/gold.fs`
-compares the app's grading against the camera-shaped engine path (engine decoder rows straight into the look). Wrapper must be max 0.
+## What you need
+
+- A Mac with **Apple silicon** on **macOS 14** or later. On macOS 26 and later the window and icon are
+  Liquid Glass; earlier versions get the standard blur.
+- Photos as camera raw (CR2, CR3, NEF, ARW, RAF, DNG, ORF, RW2, PEF, SRW, NRW), JPEG, HEIC or TIFF.
+  Raws are decoded by macOS, so any camera your Mac's Photos app can open works.
+
+## Install
+
+1. [Download SoupDesk.zip](https://github.com/thebakers-club/SoupDesk/releases/latest/download/SoupDesk.zip)
+   and unzip it.
+2. Drag **SoupDesk.app** to Applications and open it. It's signed with a Developer ID and notarized by
+   Apple, so it opens without a warning.
+
+## Use
+
+Drag photos or a folder onto the window, or press **Cmd O**.
+
+| Key | What it does |
+| --- | --- |
+| **Up / Down** | Change film |
+| **Left / Right** | Previous / next photo |
+| **F** or the star | Favourite the film (favourites come first) |
+| **Return** or **Cmd E** | Develop this photo |
+| **Shift Cmd E** | Develop every photo, each with the film you picked for it |
+
+Each photo remembers its own film, and a new photo starts on the last one you used. The preview is graded
+live; developing renders the full-size file.
+
+**Output:** `<photo folder>/Soup/<name>_<film>.jpg`, full resolution, quality 92, with the original EXIF
+kept and `SoupDesk - <film>` in the Software tag. Nothing is ever overwritten: a second develop gets a
+`-2`, `-3`… suffix, and your originals are never touched.
+
+### More stocks
+
+- **Get stocks** pulls any new official stocks from upstream Soup Engine.
+- **Import** (or drop `.fs` files on the window) adds your own.
+- **Make** opens the [Soup Stocks web editor](https://jiijii0.github.io/soup-stocks/) to build one.
+
+Your stocks live in `~/Library/Application Support/SoupDesk/Stocks`. A stock whose name already exists is
+skipped.
+
+## The stocks
+
+Colour: Astia, Classic Chrome, Classic Neg, Ektachrome E100\*, Ektar 100\*, Eterna, Gold, Kodachrome 64\*,
+Nostalgic Neg, Portra, Portra 160\*, Portra 800\*, Pro 400H\*, Provia, Reala Ace, Soup 800, Superia 400\*,
+Ultramax 400\*, Velvia, Vision3 250D\*, Vision3 500T\*, Bleach Bypass.
+Black and white: Acros, Delta 3200\*, HP5 Plus\*, T-MAX 400\*, Tri-X 400\*.
+
+\* new in Souper7D (EXPERIMENTAL). The rest come from Soup Engine.
+
+Stocks are plain-text `.fs` files: curves, per-hue saturation, split toning, grain and halation. A stock is
+a complete look; there are no sliders to tune afterwards.
+
+## Building
+
+You need Xcode 26 or later (for the Liquid Glass APIs; the app still targets macOS 14).
+
+```bash
+./build_app.sh          # build/SoupDesk.app, signed with your Apple Development identity
+./build_app.sh dist     # Developer ID, notarized and stapled, plus build/SoupDesk.zip
+```
+
+`SIGN_IDENTITY=` overrides the signing identity. `dist` needs a Developer ID Application certificate
+(Xcode → Settings → Accounts → Manage Certificates) and a notarytool keychain profile, by default
+`soupdesk-notary`:
+
+```bash
+xcrun notarytool store-credentials soupdesk-notary --apple-id <you> --team-id <your team id>
+```
+
+Layout:
+
+- `Sources/SoupEngine/`: Soup Engine C, copied unmodified from Souper7D's `src/engine`, plus `soup_bridge.c`.
+- `Sources/SoupKit/`: decoding (ImageIO / CIRAWFilter), grading and developing.
+- `Sources/SoupDesk/`: the SwiftUI app. `Resources/Stocks/`: the 27 `.fs` files and `INDEX.TXT`.
+- `Sources/soupcheck/`: verification CLI.
+- `Design/SoupDesk.icon`: the Icon Composer icon, traced from the Portra sprite by `tools/make_icon.py`.
+
+### Checks
+
+```bash
+swift build -c release
+.build/release/soupcheck photo.jpg Resources/Stocks/gold.fs
+```
+
+compares the app's grading against the camera-shaped engine path (engine decoder rows straight into the
+look); the wrapper must differ by 0. `soupcheck --develop photo.jpg stock.fs` runs the app's develop path
+on one file. The contact sheet above is made with it and `tools/contact_sheet.swift`.
 
 ## Credits and licence
 
-Soup Engine is by [jiijii0](https://github.com/jiijii0/soup-engine): the engine, its decoder, the stock format and the
-original 13 stocks are theirs. SoupDesk takes the engine and stocks from [Souper7D](https://github.com/thebakers-club/souper7d),
-the Canon 7D port, which adds 14 stocks and the speed work; this repo adds the Mac app.
-
-The looks are interpretations: the names are shorthand for the films they're based on, not exact copies.
-All trademarks belong to their owners.
+Soup Engine is by [jiijii0](https://github.com/jiijii0/soup-engine): the engine, its decoder, the stock
+format and the original 13 stocks are theirs. SoupDesk takes the engine and stocks from
+[Souper7D](https://github.com/thebakers-club/souper7d), the Canon 7D port, which adds 14 stocks and the
+speed work; this repo adds the Mac app.
 
 GPL v2, see [LICENSE](LICENSE).
