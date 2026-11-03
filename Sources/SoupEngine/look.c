@@ -571,11 +571,36 @@ static void grain_row(const se_look *lk, uint8_t *row, int w, int y)
      * as emulsion and started reading as sensor noise, which is the one
      * thing grain must not look like. */
     int amp = (lk->grain * SE_GRAIN_AMP) / 100;
+    /*
+     * The cell is the clump size, not a block. A flat value per cell put
+     * hard-edged 4-5 pixel squares on every coarse stock -- a mosaic, not
+     * emulsion. So the lattice values are blended bilinearly across the
+     * cell, and a per-pixel layer at half weight sits on top so the clumps
+     * still have a fine texture inside them.
+     */
+    int gy = y / cell, ty = ((y % cell) << 8) / cell;
+    int c00 = 0, c10 = 0, c01 = 0, c11 = 0;
     if (amp <= 0) return;
     for (x = 0; x < w; x++) {
-        int n = (int)(grain_hash((unsigned)(x / cell), (unsigned)(y / cell),
-                                 0x5EEDu) & 0xFFFF);
-        int d = ((n - 32768) * amp) >> 15;
+        int fine = (int)(grain_hash((unsigned)x, (unsigned)y, 0xF1E5u) & 0xFFFF) - 32768;
+        int n;
+        if (cell > 1) {
+            int gx = x / cell, tx = ((x % cell) << 8) / cell, top, bot;
+            if (x % cell == 0 || x == 0) {
+                c00 = (int)(grain_hash((unsigned)gx,       (unsigned)gy,       0x5EEDu) & 0xFFFF) - 32768;
+                c10 = (int)(grain_hash((unsigned)(gx + 1), (unsigned)gy,       0x5EEDu) & 0xFFFF) - 32768;
+                c01 = (int)(grain_hash((unsigned)gx,       (unsigned)(gy + 1), 0x5EEDu) & 0xFFFF) - 32768;
+                c11 = (int)(grain_hash((unsigned)(gx + 1), (unsigned)(gy + 1), 0x5EEDu) & 0xFFFF) - 32768;
+            }
+            top = c00 + (((c10 - c00) * tx) >> 8);
+            bot = c01 + (((c11 - c01) * tx) >> 8);
+            n = top + (((bot - top) * ty) >> 8) + (fine >> 1);
+            if (n >  32767) n =  32767;
+            if (n < -32768) n = -32768;
+        } else {
+            n = fine;
+        }
+        int d = (n * amp) >> 15;
         int c;
         for (c = 0; c < 3; c++) {
             int v = row[x * 3 + c];

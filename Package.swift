@@ -5,7 +5,8 @@ let package = Package(
     name: "SoupDesk",
     platforms: [.macOS(.v14)],
     targets: [
-        // Soup Engine sources copied unmodified from the 7D port, plus soup_bridge.c.
+        // Soup Engine sources copied from the 7D port, plus soup_bridge.c. One local
+        // change: look.c's grain_row interpolates its cells instead of flat blocks.
         .target(name: "SoupEngine",
                 cSettings: [.define("SE_HOSTED"), .unsafeFlags(["-O2", "-w"])]),
         .target(name: "SoupKit", dependencies: ["SoupEngine"]),
