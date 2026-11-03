@@ -8,6 +8,9 @@ Mac app: Soup Engine film stocks on any camera raw or JPEG.
 - `Sources/soupcheck/` — verification CLI.
 
 Build: `./build_app.sh` → `build/SoupDesk.app`, signed with the Apple Development identity (`SIGN_IDENTITY=` to override).
+To share: `./build_app.sh dist` signs with Developer ID, notarizes (keychain profile `soupdesk-notary`, `NOTARY_PROFILE=` to override),
+staples, and writes `build/SoupDesk.zip`. One-time setup: a Developer ID Application cert (Xcode → Settings → Accounts → Manage Certificates)
+and `xcrun notarytool store-credentials soupdesk-notary --apple-id <you> --team-id A27T7KN725` with an app-specific password.
 
 Use: drag photos/folder in. ←/→ photo, ↑/↓ stock, Return or ⌘E develop this photo, ⇧⌘E develop all.
 Film stocks: F (or the star) favourites a stock and pins it to the top; favourites are stored by stock NAME in UserDefaults.

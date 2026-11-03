@@ -1,5 +1,6 @@
 #!/bin/sh
 # Build SoupDesk.app (release), bundle the stocks, sign with the Apple Development identity.
+# ./build_app.sh dist — sign with Developer ID, notarize and staple, for running on other Macs.
 set -e
 cd "$(dirname "$0")"
 swift build -c release --product SoupDesk
@@ -21,7 +22,24 @@ cat > "$APP/Contents/Info.plist" <<PL
 <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PL
-IDENT="${SIGN_IDENTITY:-Apple Development}"
-codesign --force --deep --options runtime --timestamp=none -s "$IDENT" "$APP"
-codesign --verify --verbose "$APP"
-echo "built $APP"
+if [ "$1" != dist ]; then
+    IDENT="${SIGN_IDENTITY:-Apple Development: Shane Baker (M7H8Y883KF)}"
+    codesign --force --deep --options runtime --timestamp=none -s "$IDENT" "$APP"
+    codesign --verify --verbose "$APP"
+    echo "built $APP"
+    exit 0
+fi
+
+# dist: Developer ID sign, notarize, staple, zip for sharing.
+# Needs the notarytool keychain profile (default soupdesk-notary, NOTARY_PROFILE= to override).
+IDENT="${SIGN_IDENTITY:-Developer ID Application: Shane Baker (A27T7KN725)}"
+PROFILE="${NOTARY_PROFILE:-soupdesk-notary}"
+ZIP=build/SoupDesk.zip
+codesign --force --options runtime --timestamp -s "$IDENT" "$APP"
+codesign --verify --strict --verbose "$APP"
+rm -f "$ZIP"; ditto -c -k --keepParent "$APP" "$ZIP"
+xcrun notarytool submit "$ZIP" --keychain-profile "$PROFILE" --wait
+xcrun stapler staple "$APP"
+spctl -a -vv "$APP"
+rm -f "$ZIP"; ditto -c -k --keepParent "$APP" "$ZIP"
+echo "built $APP, notarized; share $ZIP"
