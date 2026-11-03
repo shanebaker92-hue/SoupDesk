@@ -2,7 +2,7 @@
 
 Mac app: Soup Engine film stocks on any camera raw or JPEG.
 
-- `Sources/SoupEngine/` — Soup Engine C, copied unmodified from 7DeliciousSoup `soup-7d/src/engine` (se, look, grade, stock, lut, color, wb, jpeg_dec) + `soup_bridge.c`.
+- `Sources/SoupEngine/` — Soup Engine C, copied unmodified from [Souper7D](https://github.com/shanebaker92-hue/souper7d)'s `src/engine` (se, look, grade, stock, lut, color, wb, jpeg_dec) + `soup_bridge.c`.
 - `Sources/SoupKit/` — decode (ImageIO / CIRAWFilter), grade, develop.
 - `Sources/SoupDesk/` — SwiftUI app. `Resources/Stocks/` — the 27 `.fs` + INDEX.TXT.
 - `Sources/soupcheck/` — verification CLI.
@@ -22,3 +22,14 @@ Output: `<photo folder>/Soup/<name>_<stock>.jpg` (full res, q92, EXIF kept, neve
 
 Check: `swift build -c release && .build/release/soupcheck photo.jpg Resources/Stocks/gold.fs`
 compares the app's grading against the camera-shaped engine path (engine decoder rows straight into the look). Wrapper must be max 0.
+
+## Credits and licence
+
+Soup Engine is by [jiijii0](https://github.com/jiijii0/soup-engine): the engine, its decoder, the stock format and the
+original 13 stocks are theirs. SoupDesk takes the engine and stocks from [Souper7D](https://github.com/shanebaker92-hue/souper7d),
+the Canon 7D port, which adds 14 stocks and the speed work; this repo adds the Mac app.
+
+The looks are interpretations: the names are shorthand for the films they're based on, not exact copies.
+All trademarks belong to their owners.
+
+GPL v2, see [LICENSE](LICENSE).
